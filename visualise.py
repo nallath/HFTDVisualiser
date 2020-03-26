@@ -35,7 +35,7 @@ class Command:
 class ConnectionCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("- Connect to port (\d+)")
+        self._target_regex = re.compile(". Connect to port (\d+)")
 
 class InitialConnectCommand(Command):
     pass
@@ -44,33 +44,35 @@ class LinkQPUCommand(Command):
 
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("- Link . QPU to port (\d+)")
-        self._amount_regex = re.compile("- Link (\d+) QPU")
+        self._target_regex = re.compile(". Link . QPU to port (\d+)")
+        self._amount_regex = re.compile(". Link (\d+) QPU")
 
 class BruteForceCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("- Brute force security system (\d+)")
+        self._target_regex = re.compile(". Brute force security system (\d+)")
 
 
 class AddNodeToTraceRouteCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("- Add . nodes to Trace Route (\d+)")
+        self._target_regex = re.compile(". Add . nodes to Trace Route (\d+)")
 
-        self._amount_regex = re.compile("- Add (\d+) ")
-        
+        self._amount_regex = re.compile(". Add (\d+) ")
+
 
 class CommandFactory:
 
     @classmethod
     def createCommandFromText(cls, text):
-        link_qpu_regex = re.compile('- Link . QPU to port')
-        brute_force_regex = re.compile('- Brute force security system .')
-        add_node_to_trace_route_regext = re.compile('- Add . nodes to Trace Route .')
-        if text.startswith("- Connect to port"):
+        link_qpu_regex = re.compile('. Link . QPU to port')
+        brute_force_regex = re.compile('. Brute force security system .')
+        add_node_to_trace_route_regext = re.compile('. Add . nodes to Trace Route .')
+        connect_to_port_regex = re.compile(". Connect to port")
+        initial_connect_regex = re.compile(". Initial connect")
+        if re.match(connect_to_port_regex, text):
             return ConnectionCommand(text)
-        elif text.startswith("- Initial connect"):
+        elif re.match(initial_connect_regex, text):
             return InitialConnectCommand(text)
         elif re.match(link_qpu_regex, text):
             return LinkQPUCommand(text)
@@ -99,7 +101,6 @@ class Port:
 
     def addCommandFromText(self, text):
         self._commands.append(CommandFactory.createCommandFromText(text))
-
 
     def getCommands(self):
         return self._commands
