@@ -4,6 +4,10 @@ import os
 class Command:
     def __init__(self, name):
         self.name = name
+        self._target_regex = None
+        self._amount_regex = None
+        self._target = None
+        self._amount = None
 
     def __repr__(self):
         return "<COMMAND> " + self.name
@@ -11,13 +15,27 @@ class Command:
     def __str__(self):
         return self.name
 
-class ConnectionCommand(Command):
+    @property
+    def target(self):
+        if self._target is None and self._target_regex is not None:
+            m = self._target_regex.search(self.name)
+            self._target = m.group(1)
 
+        return self._target
+
+    @property
+    def amount(self):
+        if self._amount is None and self._amount_regex is not None:
+            m = self._amount_regex.search(self.name)
+            self._amount = m.group(1)
+
+        return self._amount
+
+
+class ConnectionCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        target_regex = re.compile("- Connect to port (\d+)")
-        m = target_regex.search(name)
-        self.target = m.group(1)
+        self._target_regex = re.compile("- Connect to port (\d+)")
 
 class InitialConnectCommand(Command):
     pass
@@ -26,31 +44,22 @@ class LinkQPUCommand(Command):
 
     def __init__(self, name):
         super().__init__(name)
-        target_regex = re.compile("- Link . QPU to port (\d+)")
-        m = target_regex.search(name)
-        amount_regex = re.compile("- Link (\d+) QPU")
-        n = amount_regex.search(name)
-        
-
-        self.target = m.group(1)
-        self.amount = n.group(1)
-    pass
+        self._target_regex = re.compile("- Link . QPU to port (\d+)")
+        self._amount_regex = re.compile("- Link (\d+) QPU")
 
 class BruteForceCommand(Command):
-    target_regex = re.compile("- Brute force security system (\d+)")
-    pass
+    def __init__(self, name):
+        super().__init__(name)
+        self._target_regex = re.compile("- Brute force security system (\d+)")
+
 
 class AddNodeToTraceRouteCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        target_regex = re.compile("- Add . nodes to Trace Route (\d+)")
-        m = target_regex.search(name)
+        self._target_regex = re.compile("- Add . nodes to Trace Route (\d+)")
 
-        amount_regex = re.compile("- Add (\d+) ")
-        n = amount_regex.search(name)
+        self._amount_regex = re.compile("- Add (\d+) ")
         
-        self.target = m.group(1)
-        self.amount = n.group(1)
 
 class CommandFactory:
 
@@ -81,6 +90,7 @@ class TraceRoute:
 
     def __str__(self):
         return self.name
+
 
 class Port:
     def __init__(self, idx):
