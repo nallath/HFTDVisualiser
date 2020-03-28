@@ -6,8 +6,10 @@ class Command:
         self.name = name
         self._target_regex = None
         self._amount_regex = None
+        self._origin_regex = None
         self._target = None
         self._amount = None
+        self._origin = None
 
     def __repr__(self):
         return "<COMMAND> " + self.name
@@ -30,6 +32,14 @@ class Command:
             self._amount = m.group(1)
 
         return self._amount
+
+    @property
+    def origin(self):
+        if self._origin is None and self._origin_regex is not None:
+            m = self._origin_regex.search(self.name)
+            self._origin = m.group(1)
+
+        return self._origin
 
 
 class ConnectionCommand(Command):
@@ -61,6 +71,14 @@ class AddNodeToTraceRouteCommand(Command):
         self._amount_regex = re.compile(". Add (\d+) ")
 
 
+class RedirectQPUCommand(Command):
+    def __init__(self, name):
+        super().__init__(name)
+        self._target_regex = re.compile(". Redirect up to . QPU from port . to port (\d+)")
+        self._amount_regex = re.compile(". Redirect up to (\d+)")
+        self._origin_regex = re.compile(". Redirect up to . QPU from port (\d+)")
+
+
 class CommandFactory:
 
     @classmethod
@@ -70,6 +88,7 @@ class CommandFactory:
         add_node_to_trace_route_regext = re.compile('. Add . nodes to Trace Route .')
         connect_to_port_regex = re.compile(". Connect to port")
         initial_connect_regex = re.compile(". Initial connect")
+        redirect_qpu_regex = re.compile(". Redirect up to . QPU from port .")
         if re.match(connect_to_port_regex, text):
             return ConnectionCommand(text)
         elif re.match(initial_connect_regex, text):
@@ -80,6 +99,8 @@ class CommandFactory:
             return BruteForceCommand(text)
         elif re.match(add_node_to_trace_route_regext, text):
             return AddNodeToTraceRouteCommand(text)
+        elif re.match(redirect_qpu_regex, text):
+            return RedirectQPUCommand(text)
         return Command(text)    
 
 
@@ -168,11 +189,19 @@ def createUML(ports, trace_routes):
             result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "connect", "#red"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#red"))
             elif isinstance(command, AddNodeToTraceRouteCommand):
                 links_to_add.append((port_name, "traceroute%s" % command.target, "add %s nodes" % command.amount, "#blue"))
             elif isinstance(command, LinkQPUCommand):
                 links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#green"))
+            elif isinstance(command, RedirectQPUCommand):
+                text = ""
+                if "Port_%s" % command.origin != port_name:
+                    text = "Redirect %s QPU (from Port %s)" % (command.amount, command.origin)
+                else:
+                    text = "Redirect %s QPU" % command.amount
+
+                links_to_add.append((port_name, "Port_%s" % command.target, text, "#green"))
         
         result += "}\n"
     
