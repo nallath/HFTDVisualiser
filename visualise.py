@@ -238,6 +238,8 @@ def createUML(ports, trace_routes):
     result = ""
     result += "@startuml\n"
     result += "skinparam backgroundColor #000000\n"
+    result += "skinparam databaseBorderColor #00FF00\n"
+    result += "skinparam nodeBorderColor #00FF00\n"
     result += "skinparam objectBackgroundColor #000000\n"
     result += "skinparam defaultFontColor #00FF00\n"
     result += "skinparam objectBorderColor #00FF00\n"
@@ -288,12 +290,12 @@ def createUML(ports, trace_routes):
     result += "together {\n"
     for trace_route in trace_routes:
         trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
-        result += "object Traceroute_" + trace_route_index + "{\n"
+        result += "database Traceroute_" + trace_route_index + "{\n"
         result += "}\n"
     result += "}\n"
     result += "together {\n"
     for security_system in security_systems:
-        result += "object " + security_system.name + "{\n"
+        result += "node " + security_system.name + "{\n"
         result += "}\n"
     result += "}\n"
     for link in links_to_add:
