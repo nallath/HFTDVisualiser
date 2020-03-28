@@ -231,7 +231,7 @@ for idx, line in enumerate(data.split("\n")):
     if re.match(security_system_regex, line):
         security_systems.add(SecuritySystem(line))
 
-        
+
 def createUML(ports, trace_routes):
     links_to_add = []
 
@@ -282,16 +282,18 @@ def createUML(ports, trace_routes):
                 links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack (%s dmg)" % command.amount, "#red"))
         
         result += "}\n"
-    
+
+    result += "together {\n"
     for trace_route in trace_routes:
         trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
         result += "object Traceroute_" + trace_route_index + "{\n"
         result += "}\n"
-
+    result += "}\n"
+    result += "together {\n"
     for security_system in security_systems:
         result += "object " + security_system.name + "{\n"
         result += "}\n"
-
+    result += "}\n"
     for link in links_to_add:
         result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : <color:%s>" % link[3] + link[2] + "</color>\n"
 
