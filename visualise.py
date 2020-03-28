@@ -12,6 +12,7 @@ class Command:
         self._amount = None
         self._origin = None
         self._prefix = None
+        self.visible = True  # Some commands (such as brute force one) can have multiple targets. We split these up
 
     def __repr__(self):
         return "<COMMAND> " + self.name
@@ -73,6 +74,7 @@ class BruteForceCommand(Command):
     def __init__(self, name):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
+        self._amount_regex = re.compile("(?=((\d+) damage{1}))")
         self._prefix = "-"
 
 
@@ -112,7 +114,27 @@ class CommandFactory:
         elif re.match(link_qpu_regex, text):
             return LinkQPUCommand(text)
         elif re.match(brute_force_regex, text):
-            return BruteForceCommand(text)
+            # Check if multiple brute force commands are needed.
+            reg = re.compile("(^.*(?=(\d damage)))")
+            is_single_targets_regex = re.compile("^(\-|>)?\s*Brute force security system \d, \d damage")
+            single_target = is_single_targets_regex.search(text)
+            if single_target:
+                return BruteForceCommand(text)
+
+            pruned_text = reg.search(text).group(1)
+            all_targets_regex = re.compile("(\d,(\d)|\d and(\d)|\d)")
+            all_targets = re.findall(all_targets_regex, pruned_text)
+            results = []
+            results.append(BruteForceCommand(text))
+            for target in all_targets[1:]:
+                command = BruteForceCommand(text)
+                command.visible = False
+                command._target = target[0]
+                results.append(command)
+            return results
+            #return Command(text)
+            #self._origin = m.group(2)
+            #return BruteForceCommand(text)
         elif re.match(add_node_to_trace_route_regext, text):
             return AddNodeToTraceRouteCommand(text)
         elif re.match(redirect_qpu_regex, text):
@@ -162,7 +184,11 @@ class Port:
         self.index = idx
 
     def addCommandFromText(self, text):
-        self._commands.append(CommandFactory.createCommandFromText(text))
+        results = CommandFactory.createCommandFromText(text)
+        if isinstance(results, list):
+            self._commands.extend(results)
+        else:
+            self._commands.append(results)
 
     def getCommands(self):
         return self._commands
@@ -205,9 +231,7 @@ for idx, line in enumerate(data.split("\n")):
     if re.match(security_system_regex, line):
         security_systems.add(SecuritySystem(line))
 
-print(security_systems)
-
-
+        
 def createUML(ports, trace_routes):
     links_to_add = []
 
@@ -236,7 +260,8 @@ def createUML(ports, trace_routes):
             result += "object " + port_name + " {\n"
 
         for command in port.getCommands():
-            result += str(command) + "\n"
+            if command.visible:
+                result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
                 links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#green"))
@@ -254,7 +279,7 @@ def createUML(ports, trace_routes):
                 links_to_add.append((port_name, "Port_%s" % command.target, text, "#blue"))
 
             elif isinstance(command, BruteForceCommand):
-                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack", "#red"))
+                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack (%s dmg)" % command.amount, "#red"))
         
         result += "}\n"
     
@@ -278,7 +303,3 @@ with open("result.txt", "w") as f:
     f.write(createUML(ports, trace_routes))
 
 os.system("java -jar plantuml.jar result.txt")
-
-
-#
-#print(data)
