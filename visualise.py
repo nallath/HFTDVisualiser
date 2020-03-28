@@ -131,6 +131,31 @@ class TraceRoute:
         return self.name
 
 
+class SecuritySystem:
+    def __init__(self, line):
+        self._line = line
+        self._system_number_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
+        m = self._system_number_regex.search(self._line)
+        self._name = "SecuritySystem_%s" % m.group(2)
+
+
+    @property
+    def name(self):
+        return self._name
+
+    def __str__(self):
+        return self._name
+
+    def __hash__(self):
+        return hash(self._name)
+
+    def __repr__(self):
+        return "<SecuritySystem> " + self.name
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+
 class Port:
     def __init__(self, idx):
         self._commands = []
@@ -151,9 +176,12 @@ ports = []
 
 trace_routes = []
 
+security_systems = set()
+
 port_number = 0
 active_port = None
 trace_route_regex = re.compile("Nodes in trace route . at the start")
+security_system_regex = re.compile("^(\-|>)?\s*Brute force security system")
 
 for idx, line in enumerate(data.split("\n")):
     
@@ -161,6 +189,7 @@ for idx, line in enumerate(data.split("\n")):
         port_number += 1
         active_port = Port(port_number)
         ports.append(active_port)
+
         continue
 
     if line == "":
@@ -170,11 +199,16 @@ for idx, line in enumerate(data.split("\n")):
     if re.match(trace_route_regex, line):
         trace_routes.append(TraceRoute(line))
         continue
+
     active_port.addCommandFromText(line)
+    # We need to look through commands to get the security systems!
+    if re.match(security_system_regex, line):
+        security_systems.add(SecuritySystem(line))
+
+print(security_systems)
 
 
 def createUML(ports, trace_routes):
-
     links_to_add = []
 
     result = ""
@@ -218,12 +252,19 @@ def createUML(ports, trace_routes):
                     text = "Redirect %s QPU" % command.amount
 
                 links_to_add.append((port_name, "Port_%s" % command.target, text, "#blue"))
+
+            elif isinstance(command, BruteForceCommand):
+                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack", "#red"))
         
         result += "}\n"
     
     for trace_route in trace_routes:
         trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
         result += "object Traceroute_" + trace_route_index + "{\n"
+        result += "}\n"
+
+    for security_system in security_systems:
+        result += "object " + security_system.name + "{\n"
         result += "}\n"
 
     for link in links_to_add:
