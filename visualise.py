@@ -189,11 +189,11 @@ def createUML(ports, trace_routes):
             result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#red"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#green"))
             elif isinstance(command, AddNodeToTraceRouteCommand):
-                links_to_add.append((port_name, "traceroute%s" % command.target, "add %s nodes" % command.amount, "#blue"))
+                links_to_add.append((port_name, "Traceroute_%s" % command.target, "Add %s nodes" % command.amount, "#blue"))
             elif isinstance(command, LinkQPUCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#green"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#blue"))
             elif isinstance(command, RedirectQPUCommand):
                 text = ""
                 if "Port_%s" % command.origin != port_name:
@@ -201,13 +201,13 @@ def createUML(ports, trace_routes):
                 else:
                     text = "Redirect %s QPU" % command.amount
 
-                links_to_add.append((port_name, "Port_%s" % command.target, text, "#green"))
+                links_to_add.append((port_name, "Port_%s" % command.target, text, "#blue"))
         
         result += "}\n"
     
     for trace_route in trace_routes:
         trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
-        result += "object traceroute" + trace_route_index + "{\n"
+        result += "object Traceroute_" + trace_route_index + "{\n"
         result += "}\n"
 
     for link in links_to_add:
