@@ -18,6 +18,12 @@ class Command:
         self.color = "#FFFFFF"
         self._description = "No idea!"
 
+        self._limited = False
+
+    @property
+    def limited(self):
+        return self._limited
+
     def setPort(self, port):
         self._port = port
 
@@ -75,6 +81,9 @@ class ConnectionCommand(Command):
         self._prefix = "+"
         self.color = "#00FF00"
         self._description = "Connect"
+
+        if "<can only connect" in name:
+            self._limited = True
 
 class InitialConnectCommand(Command):
     pass
@@ -344,7 +353,10 @@ def createUML(ports, trace_routes):
             target = "Traceroute_%s" % link.target
         else:
             target = "Port_%s" % link.target
-        result += origin + " -[%s]-|> " % link.color + target + " : <color:%s>" % link.color + link.description + "</color>\n"
+        line_char = "-"
+        if link.limited:
+            line_char = "."
+        result += origin + " " + line_char + "[%s]" % link.color  + line_char + "|> " + target + " : <color:%s>" % link.color + link.description + "</color>\n"
 
     result += "footer\n"
     result += "The content of this image is confidential and intended for you only.\n " \
