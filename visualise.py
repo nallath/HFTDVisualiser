@@ -239,11 +239,13 @@ def createUML(ports, trace_routes):
     result += "@startuml\n"
     result += "skinparam backgroundColor #000000\n"
     result += "skinparam objectBackgroundColor #000000\n"
-    result += "skinparam defaultFontColor green\n"
-    result += "skinparam objectBorderColor green\n"
+    result += "skinparam defaultFontColor #00FF00\n"
+    result += "skinparam objectBorderColor #00FF00\n"
     result += "skinparam objectFontSize 17\n"
     result += "skinparam shadowing false\n"
-
+    result += "skinparam objectStereotypeFontSize 15\n"
+    result += "skinparam objectStereotypeFontColor #00FF00\n"
+    
     ##result +=
 
     for port in ports:
@@ -264,11 +266,11 @@ def createUML(ports, trace_routes):
                 result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#green"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#00FF00"))
             elif isinstance(command, AddNodeToTraceRouteCommand):
-                links_to_add.append((port_name, "Traceroute_%s" % command.target, "Add %s nodes" % command.amount, "#blue"))
+                links_to_add.append((port_name, "Traceroute_%s" % command.target, "Add %s nodes" % command.amount, "#0000FF"))
             elif isinstance(command, LinkQPUCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#blue"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#0000FF"))
             elif isinstance(command, RedirectQPUCommand):
                 text = ""
                 if "Port_%s" % command.origin != port_name:
@@ -276,10 +278,10 @@ def createUML(ports, trace_routes):
                 else:
                     text = "Redirect %s QPU" % command.amount
 
-                links_to_add.append((port_name, "Port_%s" % command.target, text, "#blue"))
+                links_to_add.append((port_name, "Port_%s" % command.target, text, "#0000FF"))
 
             elif isinstance(command, BruteForceCommand):
-                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack (%s dmg)" % command.amount, "#red"))
+                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack (%s dmg)" % command.amount, "#FF0000"))
         
         result += "}\n"
 
