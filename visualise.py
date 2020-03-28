@@ -303,9 +303,14 @@ def createUML(ports, trace_routes):
         result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : <color:%s>" % link[3] + link[2] + "</color>\n"
 
     result += "footer\n"
-    result += "The content of this image is confidential and intended for you only. It is strictly forbidden to share any part of this image with any third party, without a written consent of SeriOusBusiness_S. If you received this image by mistake, please contact SeriOusBusiness_S, together with a Dank Meme, and follow with its deletion, so that we can ensure such a mistake does not occur in the future.\n"
-    result += "PandaPosse puts the security of you at a high priority. Therefore, we have put efforts into ensuring that the image is error and virus-free. Unfortunately, full security of the image cannot be ensured as, despite our efforts, the data included in image could be infected, intercepted, or corrupted. Therefore, the recipient should check the image for threats with proper software, as we do not accept liability for any damage inflicted by viewing the content of this image.\n"
-    result += "Is it necessary to print this Image? If you care about the environment like we do, please refrain from printing. It helps to keep the environment forested and litter-free. Panda's are fucking little enough as is!\n"
+    result += "The content of this image is confidential and intended for you only.\n " \
+              "It is strictly forbidden to share any part of this image with any third party, without a written consent of SeriOusBusiness_S.\n" \
+              "If you received this image by mistake, please contact SeriOusBusiness_S, together with a Dank Meme, and follow with its deletion, so that we can ensure such a mistake does not occur in the future.\n"
+    result += "PandaPosse puts the security of you at a high priority. Therefore, we have put efforts into ensuring that the image is error and virus-free.\n" \
+              "Unfortunately, full security of the image cannot be ensured as, despite our efforts, the data included in image could be infected, intercepted, or corrupted.\n" \
+              "Therefore, the recipient should check the image for threats with proper software, as we do not accept liability for any damage inflicted by viewing the content of this image.\n"
+    result += "Is it necessary to print this Image? If you care about the environment like we do, please refrain from printing. \n" \
+              "It helps to keep the environment forested and litter-free. Panda's are fucking little enough as is!\n"
     result += "endfooter\n"
     result += "@enduml"
     return result
