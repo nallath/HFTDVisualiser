@@ -11,6 +11,7 @@ class Command:
         self._target = None
         self._amount = None
         self._origin = None
+        self._prefix = None
 
     def __repr__(self):
         return "<COMMAND> " + self.name
@@ -20,12 +21,15 @@ class Command:
 
     @property
     def name(self):
-        return re.sub(r'^(\-|>)\s', "", self._name)
+        result = re.sub(r'^(\-|>)\s', "", self._name)
+        if self._prefix is not None:
+            return self._prefix + " " + result
+        return result
 
     @property
     def target(self):
         if self._target is None and self._target_regex is not None:
-            m = self._target_regex.search(self.name)
+            m = self._target_regex.search(self._name)
             self._target = m.group(2)
 
         return self._target
@@ -33,7 +37,7 @@ class Command:
     @property
     def amount(self):
         if self._amount is None and self._amount_regex is not None:
-            m = self._amount_regex.search(self.name)
+            m = self._amount_regex.search(self._name)
             self._amount = m.group(2)
 
         return self._amount
@@ -41,7 +45,7 @@ class Command:
     @property
     def origin(self):
         if self._origin is None and self._origin_regex is not None:
-            m = self._origin_regex.search(self.name)
+            m = self._origin_regex.search(self._name)
             self._origin = m.group(2)
 
         return self._origin
@@ -51,21 +55,25 @@ class ConnectionCommand(Command):
     def __init__(self, name):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Connect to port (\d+)")
+        self._prefix = "+"
 
 class InitialConnectCommand(Command):
     pass
 
-class LinkQPUCommand(Command):
 
+class LinkQPUCommand(Command):
     def __init__(self, name):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Link . QPU to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*Link (\d+) QPU")
+        self._prefix = "~"
+
 
 class BruteForceCommand(Command):
     def __init__(self, name):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
+        self._prefix = "-"
 
 
 class AddNodeToTraceRouteCommand(Command):
@@ -74,6 +82,7 @@ class AddNodeToTraceRouteCommand(Command):
         self._target_regex = re.compile("^(\-|>)?\s*Add . nodes to Trace Route (\d+)")
 
         self._amount_regex = re.compile("^(\-|>)?\s*Add (\d+) ")
+        self._prefix = "~"
 
 
 class RedirectQPUCommand(Command):
@@ -82,6 +91,8 @@ class RedirectQPUCommand(Command):
         self._target_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port . to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*Redirect up to (\d+)")
         self._origin_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port (\d+)")
+
+        self._prefix = "~"
 
 
 class CommandFactory:
@@ -202,7 +213,7 @@ def createUML(ports, trace_routes):
             elif isinstance(command, RedirectQPUCommand):
                 text = ""
                 if "Port_%s" % command.origin != port_name:
-                    text = "Redirect %s QPU (from Port %s)" % (command.amount, command.origin)
+                    text = "Redirect %s QPU (from Port_%s)" % (command.amount, command.origin)
                 else:
                     text = "Redirect %s QPU" % command.amount
 
