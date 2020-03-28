@@ -7,12 +7,23 @@ class Command:
         self._name = name
         self._target_regex = None
         self._amount_regex = None
-        self._origin_regex = None
+        self._from_regex = None
         self._target = None
         self._amount = None
         self._origin = None
         self._prefix = None
         self.visible = True  # Some commands (such as brute force one) can have multiple targets. We split these up
+        self._port = None
+        self._from = None
+        self.color = "#FFFFFF"
+        self._description = "No idea!"
+
+    def setPort(self, port):
+        self._port = port
+
+    @property
+    def description(self):
+        return self._description
 
     def __repr__(self):
         return "<COMMAND> " + self.name
@@ -44,11 +55,16 @@ class Command:
         return self._amount
 
     @property
-    def origin(self):
-        if self._origin is None and self._origin_regex is not None:
-            m = self._origin_regex.search(self._name)
-            self._origin = m.group(2)
+    def fro(self):
+        if self._from is None and self._from_regex is not None:
+            m = self._from_regex.search(self._name)
+            self._from = m.group(2)
+        return self._from
 
+    @property
+    def origin(self):
+        if self._origin is None and self._port is not None:
+            return self._port.index
         return self._origin
 
 
@@ -57,6 +73,8 @@ class ConnectionCommand(Command):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Connect to port (\d+)")
         self._prefix = "+"
+        self.color = "#00FF00"
+        self._description = "Connect"
 
 class InitialConnectCommand(Command):
     pass
@@ -68,6 +86,11 @@ class LinkQPUCommand(Command):
         self._target_regex = re.compile("^(\-|>)?\s*Link . QPU to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*Link (\d+) QPU")
         self._prefix = "~"
+        self.color = "#0000ff"
+
+    @property
+    def description(self):
+        return "Link %s QPU" % self.amount
 
 
 class BruteForceCommand(Command):
@@ -76,6 +99,11 @@ class BruteForceCommand(Command):
         self._target_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
         self._amount_regex = re.compile("(?=((\d+) damage{1}))")
         self._prefix = "-"
+        self.color = "#ff0000"
+
+    @property
+    def description(self):
+        return "Attack (%s dmg)" % self.amount
 
 
 class AddNodeToTraceRouteCommand(Command):
@@ -85,6 +113,11 @@ class AddNodeToTraceRouteCommand(Command):
 
         self._amount_regex = re.compile("^(\-|>)?\s*Add (\d+) ")
         self._prefix = "~"
+        self.color = "#0000ff"
+
+    @property
+    def description(self):
+        return "Add %s nodes" % self.amount
 
 
 class RedirectQPUCommand(Command):
@@ -92,9 +125,16 @@ class RedirectQPUCommand(Command):
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port . to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*Redirect up to (\d+)")
-        self._origin_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port (\d+)")
+        self._from_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port (\d+)")
 
         self._prefix = "~"
+        self.color = "#0000ff"
+
+    @property
+    def description(self):
+        if self.origin != self.fro:
+            return "Redirect %s QPU (from Port_%s)" % (self.amount, self.fro)
+        return "Redirect %s QPU" % self.amount
 
 
 class CommandFactory:
@@ -186,8 +226,11 @@ class Port:
     def addCommandFromText(self, text):
         results = CommandFactory.createCommandFromText(text)
         if isinstance(results, list):
+            for result in results:
+                result.setPort(self)
             self._commands.extend(results)
         else:
+            results.setPort(self)
             self._commands.append(results)
 
     def getCommands(self):
@@ -269,22 +312,15 @@ def createUML(ports, trace_routes):
                 result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Connect", "#00FF00"))
+                links_to_add.append(command)
             elif isinstance(command, AddNodeToTraceRouteCommand):
-                links_to_add.append((port_name, "Traceroute_%s" % command.target, "Add %s nodes" % command.amount, "#0000FF"))
+                links_to_add.append(command)
             elif isinstance(command, LinkQPUCommand):
-                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#0000FF"))
+                links_to_add.append(command)
             elif isinstance(command, RedirectQPUCommand):
-                text = ""
-                if "Port_%s" % command.origin != port_name:
-                    text = "Redirect %s QPU (from Port_%s)" % (command.amount, command.origin)
-                else:
-                    text = "Redirect %s QPU" % command.amount
-
-                links_to_add.append((port_name, "Port_%s" % command.target, text, "#0000FF"))
-
+                links_to_add.append(command)
             elif isinstance(command, BruteForceCommand):
-                links_to_add.append((port_name, "SecuritySystem_%s" % command.target, "Attack (%s dmg)" % command.amount, "#FF0000"))
+                links_to_add.append(command)
         
         result += "}\n"
 
@@ -300,7 +336,15 @@ def createUML(ports, trace_routes):
         result += "}\n"
     result += "}\n"
     for link in links_to_add:
-        result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : <color:%s>" % link[3] + link[2] + "</color>\n"
+
+        origin = "Port_%s" % link.origin
+        if isinstance(link, BruteForceCommand):
+            target = "SecuritySystem_%s" % link.target
+        elif isinstance(link, AddNodeToTraceRouteCommand):
+            target = "Traceroute_%s" % link.target
+        else:
+            target = "Port_%s" % link.target
+        result += origin + " -[%s]-|> " % link.color + target + " : <color:%s>" % link.color + link.description + "</color>\n"
 
     result += "footer\n"
     result += "The content of this image is confidential and intended for you only.\n " \
