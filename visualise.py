@@ -105,6 +105,7 @@ class Port:
     def getCommands(self):
         return self._commands
 
+
 with open("sample_server.txt") as f:
     data = f.read()
 
@@ -128,25 +129,11 @@ for idx, line in enumerate(data.split("\n")):
     if line == "":
         active_port = None # Whitespace means we're not in a node anymore, stfu
         continue
-    
-    
-    
+
     if re.match(trace_route_regex, line):
         trace_routes.append(TraceRoute(line))
         continue
-
-
     active_port.addCommandFromText(line)
-
-
-
-
-
-
-#print([port.getCommands() for port in ports])
-
-
-
 
 
 def createUML(ports, trace_routes):
@@ -165,7 +152,7 @@ def createUML(ports, trace_routes):
     ##result +=
 
     for port in ports:
-        port_name = "port%s" % port.index
+        port_name = "Port_%s" % port.index
 
         is_initial_port = False
         for command in port.getCommands():
@@ -175,17 +162,17 @@ def createUML(ports, trace_routes):
         if is_initial_port:
             result += "object " + port_name + " <<ENTRY POINT>> {\n"
         else:
-            result += "object " + port_name + "{\n"
+            result += "object " + port_name + " {\n"
 
         for command in port.getCommands():
             result += str(command) + "\n"
 
             if isinstance(command, ConnectionCommand):
-                links_to_add.append((port_name, "port%s" % command.target, "connect", "#red"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "connect", "#red"))
             elif isinstance(command, AddNodeToTraceRouteCommand):
                 links_to_add.append((port_name, "traceroute%s" % command.target, "add %s nodes" % command.amount, "#blue"))
             elif isinstance(command, LinkQPUCommand):
-                links_to_add.append((port_name, "port%s" % command.target, "Link %s QPU" % command.amount, "#green"))
+                links_to_add.append((port_name, "Port_%s" % command.target, "Link %s QPU" % command.amount, "#green"))
         
         result += "}\n"
     
@@ -194,12 +181,8 @@ def createUML(ports, trace_routes):
         result += "object traceroute" + trace_route_index + "{\n"
         result += "}\n"
 
-
-
     for link in links_to_add:
         result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : " + link[2] + "\n"
-
-
 
     result += "@enduml"
     return result
