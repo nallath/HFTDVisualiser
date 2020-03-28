@@ -97,6 +97,9 @@ class LinkQPUCommand(Command):
         self._prefix = "~"
         self.color = "#0000ff"
 
+        if "<Maximum of" in self._name:
+            self._limited = True
+
     @property
     def description(self):
         return "Link %s QPU" % self.amount
