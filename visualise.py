@@ -237,6 +237,7 @@ def createUML(ports, trace_routes):
 
     result = ""
     result += "@startuml\n"
+    result += "title Proudly powered by <size:30><b>SeriOusBusiness_S</b>™℠®© Pat. Pend.</size>\n"
     result += "skinparam backgroundColor #000000\n"
     result += "skinparam databaseBorderColor #00FF00\n"
     result += "skinparam nodeBorderColor #00FF00\n"
