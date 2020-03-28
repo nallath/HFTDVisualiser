@@ -1,9 +1,10 @@
 import re
 import os
 
+
 class Command:
     def __init__(self, name):
-        self.name = name
+        self._name = name
         self._target_regex = None
         self._amount_regex = None
         self._origin_regex = None
@@ -18,10 +19,14 @@ class Command:
         return self.name
 
     @property
+    def name(self):
+        return re.sub(r'^(\-|>)\s', "", self._name)
+
+    @property
     def target(self):
         if self._target is None and self._target_regex is not None:
             m = self._target_regex.search(self.name)
-            self._target = m.group(1)
+            self._target = m.group(2)
 
         return self._target
 
@@ -29,7 +34,7 @@ class Command:
     def amount(self):
         if self._amount is None and self._amount_regex is not None:
             m = self._amount_regex.search(self.name)
-            self._amount = m.group(1)
+            self._amount = m.group(2)
 
         return self._amount
 
@@ -37,7 +42,7 @@ class Command:
     def origin(self):
         if self._origin is None and self._origin_regex is not None:
             m = self._origin_regex.search(self.name)
-            self._origin = m.group(1)
+            self._origin = m.group(2)
 
         return self._origin
 
@@ -45,7 +50,7 @@ class Command:
 class ConnectionCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile(". Connect to port (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Connect to port (\d+)")
 
 class InitialConnectCommand(Command):
     pass
@@ -54,41 +59,41 @@ class LinkQPUCommand(Command):
 
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile(". Link . QPU to port (\d+)")
-        self._amount_regex = re.compile(". Link (\d+) QPU")
+        self._target_regex = re.compile("^(\-|>)?\s*Link . QPU to port (\d+)")
+        self._amount_regex = re.compile("^(\-|>)?\s*Link (\d+) QPU")
 
 class BruteForceCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile(". Brute force security system (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
 
 
 class AddNodeToTraceRouteCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile(". Add . nodes to Trace Route (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Add . nodes to Trace Route (\d+)")
 
-        self._amount_regex = re.compile(". Add (\d+) ")
+        self._amount_regex = re.compile("^(\-|>)?\s*Add (\d+) ")
 
 
 class RedirectQPUCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile(". Redirect up to . QPU from port . to port (\d+)")
-        self._amount_regex = re.compile(". Redirect up to (\d+)")
-        self._origin_regex = re.compile(". Redirect up to . QPU from port (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port . to port (\d+)")
+        self._amount_regex = re.compile("^(\-|>)?\s*Redirect up to (\d+)")
+        self._origin_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port (\d+)")
 
 
 class CommandFactory:
 
     @classmethod
     def createCommandFromText(cls, text):
-        link_qpu_regex = re.compile('. Link . QPU to port')
-        brute_force_regex = re.compile('. Brute force security system .')
-        add_node_to_trace_route_regext = re.compile('. Add . nodes to Trace Route .')
-        connect_to_port_regex = re.compile(". Connect to port")
-        initial_connect_regex = re.compile(". Initial connect")
-        redirect_qpu_regex = re.compile(". Redirect up to . QPU from port .")
+        link_qpu_regex = re.compile('^(\-|>)?\s*Link . QPU to port')
+        brute_force_regex = re.compile('^(\-|>)?\s*Brute force security system .')
+        add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
+        connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
+        initial_connect_regex = re.compile("^(\-|>)?\s*Initial connect")
+        redirect_qpu_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port .")
         if re.match(connect_to_port_regex, text):
             return ConnectionCommand(text)
         elif re.match(initial_connect_regex, text):
