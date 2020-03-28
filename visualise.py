@@ -227,7 +227,7 @@ def createUML(ports, trace_routes):
         result += "}\n"
 
     for link in links_to_add:
-        result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : " + link[2] + "\n"
+        result += link[0] + " -[%s]-|> " % link[3] + link[1] + " : <color:%s>" % link[3] + link[2] + "</color>\n"
 
     result += "@enduml"
     return result
