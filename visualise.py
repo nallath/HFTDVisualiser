@@ -155,26 +155,39 @@ def createUML(ports, trace_routes):
 
     result = ""
     result += "@startuml\n"
+    result += "skinparam backgroundColor #000000\n"
+    result += "skinparam objectBackgroundColor #000000\n"
+    result += "skinparam defaultFontColor green\n"
+    result += "skinparam objectBorderColor green\n"
+    result += "skinparam objectFontSize 17\n"
+    result += "skinparam shadowing false\n"
+
+    ##result +=
 
     for port in ports:
         port_name = "port%s" % port.index
-        result += "object " + port_name + "{\n"
+
         is_initial_port = False
         for command in port.getCommands():
-            result += str(command) + "\n"
-            
             if isinstance(command, InitialConnectCommand):
                 is_initial_port = True
-            elif isinstance(command, ConnectionCommand):
+                break
+        if is_initial_port:
+            result += "object " + port_name + " <<ENTRY POINT>> {\n"
+        else:
+            result += "object " + port_name + "{\n"
+
+        for command in port.getCommands():
+            result += str(command) + "\n"
+
+            if isinstance(command, ConnectionCommand):
                 links_to_add.append((port_name, "port%s" % command.target, "connect", "#red"))
             elif isinstance(command, AddNodeToTraceRouteCommand):
                 links_to_add.append((port_name, "traceroute%s" % command.target, "add %s nodes" % command.amount, "#blue"))
             elif isinstance(command, LinkQPUCommand):
                 links_to_add.append((port_name, "port%s" % command.target, "Link %s QPU" % command.amount, "#green"))
         
-        result += "}\n" 
-        if is_initial_port:
-            result += "note left: Entry point\n"
+        result += "}\n"
     
     for trace_route in trace_routes:
         trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
