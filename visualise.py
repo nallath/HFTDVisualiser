@@ -92,8 +92,8 @@ class InitialConnectCommand(Command):
 class LinkQPUCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("^(\-|>)?\s*Link . QPU to port (\d+)")
-        self._amount_regex = re.compile("^(\-|>)?\s*Link (\d+) QPU")
+        self._target_regex = re.compile("^(\-|>)?\s*Link( up|) . QPU to port (\d+)")
+        self._amount_regex = re.compile("^(\-|>)?\s*Link( up|) (\d+)")
         self._prefix = "~"
         self.color = "#0000ff"
 
@@ -153,7 +153,7 @@ class CommandFactory:
 
     @classmethod
     def createCommandFromText(cls, text):
-        link_qpu_regex = re.compile('^(\-|>)?\s*Link . QPU to port')
+        link_qpu_regex = re.compile("^(\-|>)?\s*Link( up|) . QPU to port")
         brute_force_regex = re.compile('^(\-|>)?\s*Brute force [Ss]ecurity [Ss]ystem .')
         add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
         connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
