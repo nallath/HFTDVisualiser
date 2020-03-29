@@ -48,7 +48,7 @@ class Command:
     def target(self):
         if self._target is None and self._target_regex is not None:
             m = self._target_regex.search(self._name)
-            self._target = m.group(2)
+            self._target = m.groups()[-1]
 
         return self._target
 
@@ -56,7 +56,7 @@ class Command:
     def amount(self):
         if self._amount is None and self._amount_regex is not None:
             m = self._amount_regex.search(self._name)
-            self._amount = m.group(2)
+            self._amount = m.groups()[-1]
 
         return self._amount
 
@@ -64,7 +64,7 @@ class Command:
     def fro(self):
         if self._from is None and self._from_regex is not None:
             m = self._from_regex.search(self._name)
-            self._from = m.group(2)
+            self._from = m.groups()[-1]
         return self._from
 
     @property
@@ -135,9 +135,9 @@ class AddNodeToTraceRouteCommand(Command):
 class RedirectQPUCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port . to port (\d+)")
-        self._amount_regex = re.compile("^(\-|>)?\s*Redirect up to (\d+)")
-        self._from_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*((Divert)|(Redirect up to)) . QPU from port . to port (\d+)")
+        self._amount_regex = re.compile("^(\-|>)?\s*((Divert)|(Redirect up to)) (\d+|#)")
+        self._from_regex = re.compile("^(\-|>)?\s*((Divert)|(Redirect up to)) . QPU from port (\d+)")
 
         self._prefix = "~"
         self.color = "#0000ff"
@@ -158,7 +158,7 @@ class CommandFactory:
         add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
         connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
         initial_connect_regex = re.compile("^(\-|>)?\s*Initial connect")
-        redirect_qpu_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port .")
+        redirect_qpu_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from port .|(\-|>)?\s* Divert . QPU from port")
         if re.match(connect_to_port_regex, text):
             return ConnectionCommand(text)
         elif re.match(initial_connect_regex, text):
@@ -184,9 +184,6 @@ class CommandFactory:
                 command._target = target[0]
                 results.append(command)
             return results
-            #return Command(text)
-            #self._origin = m.group(2)
-            #return BruteForceCommand(text)
         elif re.match(add_node_to_trace_route_regext, text):
             return AddNodeToTraceRouteCommand(text)
         elif re.match(redirect_qpu_regex, text):
