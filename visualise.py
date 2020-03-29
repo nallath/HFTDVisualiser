@@ -308,8 +308,10 @@ for idx, line in enumerate(data.split("\n")):
     if re.match(trace_route_regex, line):
         trace_routes.append(TraceRoute(line))
         continue
-
-    active_port.addCommandFromText(line)
+    if active_port is not None:
+        active_port.addCommandFromText(line)
+    else:
+        print("Could not add command, since no active port is active! [", line, "]")
     # We need to look through commands to get the security systems!
     if re.match(security_system_regex, line):
         security_systems.add(SecuritySystem(line))
