@@ -11,10 +11,10 @@ class TraceRoute:
         self._system_number_regex = re.compile("Nodes in trace route (\d+) at the start|Trace Route (\d+)")
         match = re.match(self._system_number_regex, line)
         if match.group(1) is not None:
-            tracesystem_number = match.group(1)
+            trace_route_number = match.group(1)
         else:
-            tracesystem_number = match.group(2)
-        self._name = "Traceroute_%s" % tracesystem_number
+            trace_route_number = match.group(2)
+        self._name = "Traceroute_%s" % trace_route_number
 
     def __repr__(self):
         return "<TraceRoute> " + self.name
