@@ -195,14 +195,26 @@ class CommandFactory:
 
 
 class TraceRoute:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, line):
+        self._line = line
+        self._system_number_regex = re.compile("Nodes in trace route (\d+) at the start|Trace Route (\d+)")
+        match = re.match(self._system_number_regex, line)
+        if match.group(1) is not None:
+            tracesystem_number = match.group(1)
+        else:
+            tracesystem_number = match.group(2)
+        self._name = "Traceroute_%s" % tracesystem_number
 
     def __repr__(self):
         return "<TraceRoute> " + self.name
 
     def __str__(self):
         return self.name
+
+    @property
+    def name(self):
+        return self._name
+
 
 
 class SecuritySystem:
@@ -261,7 +273,7 @@ security_systems = set()
 
 port_number = 0
 active_port = None
-trace_route_regex = re.compile("Nodes in trace route . at the start")
+trace_route_regex = re.compile("Nodes in trace route . at the start|Trace Route .")
 security_system_regex = re.compile("^(\-|>)?\s*Brute force security system")
 
 for idx, line in enumerate(data.split("\n")):
@@ -338,8 +350,7 @@ def createUML(ports, trace_routes):
 
     result += "together {\n"
     for trace_route in trace_routes:
-        trace_route_index = trace_route.name.partition("Nodes in trace route ")[2][:1]
-        result += "database Traceroute_" + trace_route_index + "{\n"
+        result += "database " + trace_route.name + "{\n"
         result += "}\n"
     result += "}\n"
     result += "together {\n"
