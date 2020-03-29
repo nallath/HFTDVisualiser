@@ -108,7 +108,7 @@ class LinkQPUCommand(Command):
 class BruteForceCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem (\d+)")
         self._amount_regex = re.compile("(?=((\d+) damage{1}))")
         self._prefix = "-"
         self.color = "#ff0000"
@@ -154,7 +154,7 @@ class CommandFactory:
     @classmethod
     def createCommandFromText(cls, text):
         link_qpu_regex = re.compile('^(\-|>)?\s*Link . QPU to port')
-        brute_force_regex = re.compile('^(\-|>)?\s*Brute force security system .')
+        brute_force_regex = re.compile('^(\-|>)?\s*Brute force [Ss]ecurity [Ss]ystem .')
         add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
         connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
         initial_connect_regex = re.compile("^(\-|>)?\s*Initial connect")
@@ -168,7 +168,7 @@ class CommandFactory:
         elif re.match(brute_force_regex, text):
             # Check if multiple brute force commands are needed.
             reg = re.compile("(^.*(?=(\d damage)))")
-            is_single_targets_regex = re.compile("^(\-|>)?\s*Brute force security system \d, \d damage")
+            is_single_targets_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem \d, \d damage")
             single_target = is_single_targets_regex.search(text)
             if single_target:
                 return BruteForceCommand(text)
@@ -217,7 +217,7 @@ class TraceRoute:
 class SecuritySystem:
     def __init__(self, line):
         self._line = line
-        self._system_number_regex = re.compile("^(\-|>)?\s*Brute force security system (\d+)")
+        self._system_number_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem (\d+)")
         m = self._system_number_regex.search(self._line)
         self._name = "SecuritySystem_%s" % m.group(2)
 
@@ -271,7 +271,7 @@ security_systems = set()
 port_number = 0
 active_port = None
 trace_route_regex = re.compile("Nodes in trace route . at the start|Trace Route .")
-security_system_regex = re.compile("^(\-|>)?\s*Brute force security system")
+security_system_regex = re.compile("^(\-|>)?\s*Brute force [Ss]ecurity [Ss]ystem")
 
 for idx, line in enumerate(data.split("\n")):
     
