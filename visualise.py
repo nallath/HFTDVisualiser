@@ -85,12 +85,20 @@ class ConnectionCommand(Command):
         if "<can only connect" in name:
             self._limited = True
 
+
 class InitialConnectCommand(Command):
     pass
 
 
 class LinkQPUCommand(Command):
     def __init__(self, name):
+        """
+        Examples of this command:
+        > Link up 1 QPU to port 1
+        > Link 5 QPU to port 3 (Maximum of 3 times per hack)
+        - Link 2 QPU to port 7
+        :param name:
+        """
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Link( up|) . QPU to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*Link( up|) (\d+)")
@@ -107,6 +115,12 @@ class LinkQPUCommand(Command):
 
 class BruteForceCommand(Command):
     def __init__(self, name):
+        """
+        - Brute force Security System 3, 2 damage
+        - Brute force security system 3, 5 damage
+        > Brute force security system 1, 2 and 3, 1 damage, costs 1 QPU linked to port 3
+        :param name:
+        """
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem (\d+)")
         self._amount_regex = re.compile("(?=((\d+) damage{1}))")
@@ -134,6 +148,11 @@ class AddNodeToTraceRouteCommand(Command):
 
 class RedirectQPUCommand(Command):
     def __init__(self, name):
+        """
+        - Redirect up to 3 QPU from port 3 to port 5
+        > Direct 2 QPU from port 3 to port 1
+        :param name:
+        """
         super().__init__(name)
         self._target_regex = re.compile("^(\-|>)?\s*((Divert)|(Redirect up to)) . QPU from port . to port (\d+)")
         self._amount_regex = re.compile("^(\-|>)?\s*((Divert)|(Redirect up to)) (\d+|#)")
