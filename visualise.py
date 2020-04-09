@@ -1,6 +1,6 @@
 import re
 import os
-
+import sys
 
 from Commands import CommandFactory
 from Commands import InitialConnectCommand, BruteForceCommand, AddNodeToTraceRouteCommand
@@ -71,7 +71,12 @@ class Port:
         return self._commands
 
 
-with open("sample_server.txt") as f:
+if len(sys.argv) > 1:
+    input_file = sys.argv[1]
+else:
+    input_file = "sample_server.txt"
+
+with open(input_file) as f:
     data = f.read()
 
 
@@ -191,7 +196,16 @@ def createUML(ports, trace_routes):
     return result
 
 
-with open("result.txt", "w") as f:
+result_file = input_file.replace(".txt", "") + "_result.txt"
+
+image_file = input_file.replace(".txt", ".png")
+
+with open(result_file, "w") as f:
     f.write(createUML(ports, trace_routes))
 
-os.system("java -jar plantuml.jar result.txt")
+os.system("cat %s | java -jar plantuml.jar -pipe > %s" % (result_file, image_file))
+
+# Do some clean up.
+os.remove(result_file)
+if input_file != "sample_server.txt":
+    os.remove(input_file)

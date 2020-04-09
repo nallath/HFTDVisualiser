@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import flask
 import os
+import uuid
 app = Flask(__name__)
 
 
@@ -8,15 +9,18 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+
 @app.route("/submit", methods=["POST"])
 def submit():
-    #return "WAIT WUT", request.form["serverVisualisation"])
-    with open("sample_server.txt", "w") as f:
+
+    unique_id = uuid.uuid4()
+    file_name = "%s.txt" % unique_id
+    with open(file_name, "w") as f:
         f.write(request.form['serverVisualisation'])
 
-    os.system("python3 visualise.py")
+    os.system("python3 visualise.py %s" % file_name)
 
-    return "<img src='../result.png'>"
+    return "<img src='../%s.png'>" % unique_id
 
 
 @app.route("/<path:path>")
