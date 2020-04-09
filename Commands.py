@@ -125,7 +125,7 @@ class BruteForceCommand(Command):
         :param name:
         """
         super().__init__(name)
-        self._target_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Brute [fF]orce [sS]ecurity [sS]ystem (\d+)")
         self._amount_regex = re.compile("(?=((\d+) damage{1}))")
         self._prefix = "-"
         self.color = "#ff0000"
@@ -180,7 +180,7 @@ class CommandFactory:
     @classmethod
     def createCommandFromText(cls, text):
         link_qpu_regex = re.compile("^(\-|>)?\s*Link( up|) . QPU to port")
-        brute_force_regex = re.compile('^(\-|>)?\s*Brute force [Ss]ecurity [Ss]ystem .')
+        brute_force_regex = re.compile('^(\-|>)?\s*Brute [Ff]orce [Ss]ecurity [Ss]ystem .')
         add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
         connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
         initial_connect_regex = re.compile("^(\-|>)?\s*Initial connect")

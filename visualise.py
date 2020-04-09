@@ -30,10 +30,9 @@ class TraceRoute:
 class SecuritySystem:
     def __init__(self, line):
         self._line = line
-        self._system_number_regex = re.compile("^(\-|>)?\s*Brute force [sS]ecurity [sS]ystem (\d+)")
+        self._system_number_regex = re.compile("^(\-|>)?\s*Brute [Ff]orce [sS]ecurity [sS]ystem (\d+)")
         m = self._system_number_regex.search(self._line)
         self._name = "SecuritySystem_%s" % m.group(2)
-
 
     @property
     def name(self):
@@ -84,7 +83,7 @@ security_systems = set()
 port_number = 0
 active_port = None
 trace_route_regex = re.compile("Nodes in trace route . at the start|Trace Route .")
-security_system_regex = re.compile("^(\-|>)?\s*Brute force [Ss]ecurity [Ss]ystem")
+security_system_regex = re.compile("^(\-|>)?\s*Brute [fF]orce [Ss]ecurity [Ss]ystem")
 
 for idx, line in enumerate(data.split("\n")):
     
