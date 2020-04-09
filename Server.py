@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import flask
 import os
 import uuid
@@ -20,7 +20,7 @@ def submit():
 
     os.system("python3 visualise.py %s" % file_name)
 
-    return "<img src='../%s.png'>" % unique_id
+    return send_file("%s.png" % unique_id, mimetype='image/gif')
 
 
 @app.route("/<path:path>")
