@@ -5,6 +5,7 @@ import os
 from Commands import CommandFactory
 from Commands import InitialConnectCommand, BruteForceCommand, AddNodeToTraceRouteCommand
 
+
 class TraceRoute:
     def __init__(self, line):
         self._line = line
