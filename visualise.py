@@ -9,7 +9,7 @@ from Commands import InitialConnectCommand, BruteForceCommand, AddNodeToTraceRou
 class TraceRoute:
     def __init__(self, line):
         self._line = line
-        self._system_number_regex = re.compile("Nodes in trace route (\d+)|Trace Route (\d+)")
+        self._system_number_regex = re.compile("Nodes in [tT]race [rR]oute (\d+)")
         match = re.match(self._system_number_regex, line)
         if match.group(1) is not None:
             trace_route_number = match.group(1)
@@ -88,7 +88,7 @@ security_systems = set()
 
 port_number = 0
 active_port = None
-trace_route_regex = re.compile("Nodes in trace route .|Trace Route .")
+trace_route_regex = re.compile("Nodes in [tT]race [rR]oute .")
 security_system_regex = re.compile("^(\-|>)?\s*Brute [fF]orce [Ss]ecurity [Ss]ystem")
 
 for idx, line in enumerate(data.split("\n")):
