@@ -170,7 +170,7 @@ class RedirectQPUCommand(Command):
 
     @property
     def description(self):
-        if self.origin != self.fro:
+        if str(self.origin) != str(self.fro):
             return "Redirect %s QPU (from Port_%s)" % (self.amount, self.fro)
         return "Redirect %s QPU" % self.amount
 
