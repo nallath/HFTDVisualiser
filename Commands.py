@@ -139,7 +139,7 @@ class BruteForceCommand(Command):
 class AddNodeToTraceRouteCommand(Command):
     def __init__(self, name):
         super().__init__(name)
-        self._target_regex = re.compile("^(\-|>)?\s*Add . nodes to Trace Route (\d+)")
+        self._target_regex = re.compile("^(\-|>)?\s*Add . nodes to [Tt]race [Rr]oute (\d+)")
 
         self._amount_regex = re.compile("^(\-|>)?\s*Add (\d+) ")
         self._prefix = "~"
@@ -181,7 +181,7 @@ class CommandFactory:
     def createCommandFromText(cls, text):
         link_qpu_regex = re.compile("^(\-|>)?\s*Link( up|) . QPU to [pP]ort")
         brute_force_regex = re.compile('^(\-|>)?\s*Brute [Ff]orce [Ss]ecurity [Ss]ystem .')
-        add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to Trace Route .')
+        add_node_to_trace_route_regext = re.compile('^(\-|>)?\s*Add . nodes to [Tt]race [Rr]oute .')
         connect_to_port_regex = re.compile("^(\-|>)?\s*Connect to port")
         initial_connect_regex = re.compile("^(\-|>)?\s*Initial connect")
         redirect_qpu_regex = re.compile("^(\-|>)?\s*Redirect up to . QPU from [pP]ort .|(\-|>)?\s* Divert . QPU from [pP]ort")
