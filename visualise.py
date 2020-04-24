@@ -29,11 +29,8 @@ class TraceRoute:
 
 
 class SecuritySystem:
-    def __init__(self, line):
-        self._line = line
-        self._system_number_regex = re.compile("^(\-|>)?\s*Brute [Ff]orce [sS]ecurity [sS]ystem (\d+)")
-        m = self._system_number_regex.search(self._line)
-        self._name = "SecuritySystem_%s" % m.group(2)
+    def __init__(self, number):
+        self._name = "SecuritySystem_%s" % number
 
     @property
     def name(self):
@@ -111,10 +108,12 @@ for idx, line in enumerate(data.split("\n")):
         active_port.addCommandFromText(line)
     else:
         print("Could not add command, since no active port is active! [", line, "]")
-    # We need to look through commands to get the security systems!
-    if re.match(security_system_regex, line):
-        security_systems.add(SecuritySystem(line))
 
+
+for port in ports:
+    for command in port.getCommands():
+        if isinstance(command, BruteForceCommand):
+            security_systems.add(SecuritySystem(command.target))
 
 def createUML(ports, trace_routes):
     links_to_add = []
@@ -155,7 +154,7 @@ def createUML(ports, trace_routes):
             if command.show_link:
                 links_to_add.append(command)
 
-        
+
         result += "}\n"
 
     result += "together {\n"

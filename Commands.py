@@ -202,6 +202,7 @@ class CommandFactory:
             pruned_text = reg.search(text).group(1)
             all_targets_regex = re.compile("(\d,(\d)|\d and(\d)|\d)")
             all_targets = re.findall(all_targets_regex, pruned_text)
+
             results = []
             results.append(BruteForceCommand(text))
             for target in all_targets[1:]:
