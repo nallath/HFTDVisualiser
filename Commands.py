@@ -131,6 +131,9 @@ class BruteForceCommand(Command):
         self.color = "#ff0000"
         self.show_link = True
 
+        if "Maximum of" in self._name:
+            self._limited = True
+
     @property
     def description(self):
         return "Attack (%s dmg)" % self.amount
